@@ -59,5 +59,24 @@ namespace StudentAdmin.API.Controllers
             //}
             //return Ok(DomainModelStudents);
         }
+
+
+        [HttpGet]
+       [Route("[controller]/{studentId:guid}")]
+       // [Route("api/[controller]")]
+       // [ApiController]
+
+        public async Task<IActionResult>  GetStudentAsync([FromRoute] Guid studentId)
+        {
+            var student = await studentRepository.GetStudentAsync(studentId);
+
+            if(student == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(mapper.Map<Student>(student));
+
+        }
     }
 }

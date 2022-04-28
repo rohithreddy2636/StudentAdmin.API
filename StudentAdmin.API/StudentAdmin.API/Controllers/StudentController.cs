@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using StudentAdmin.API.Data_Models;
 
 namespace StudentAdmin.API.Controllers
 {
@@ -16,7 +17,7 @@ namespace StudentAdmin.API.Controllers
         private readonly IStudentRepository studentRepository;
         private readonly IMapper mapper;
 
-        public StudentController(IStudentRepository studentRepository , IMapper mapper)
+        public StudentController(IStudentRepository studentRepository, IMapper mapper)
         {
             this.studentRepository = studentRepository;
             this.mapper = mapper;
@@ -25,9 +26,9 @@ namespace StudentAdmin.API.Controllers
         [Route("[controller]")]
         public async Task<IActionResult> GetAllStudentsAsync()
         {
-           var Students = await studentRepository.GetStudentsAsync();
+            var Students = await studentRepository.GetStudentsAsync();
 
-            return Ok(mapper.Map<List<Student>>(Students));
+            return Ok(mapper.Map<List<Domain_Models.Student>>(Students));
 
             //var DomainModelStudents = new List<Student>();
 
@@ -54,7 +55,7 @@ namespace StudentAdmin.API.Controllers
             //            Id= Student.Gender.Id,
             //            Description= Student.Gender.Description
             //        }
-                    
+
             //    });
             //}
             //return Ok(DomainModelStudents);
@@ -62,21 +63,39 @@ namespace StudentAdmin.API.Controllers
 
 
         [HttpGet]
-       [Route("[controller]/{studentId:guid}")]
-       // [Route("api/[controller]")]
-       // [ApiController]
+        [Route("[controller]/{studentId:guid}")]
+        // [Route("api/[controller]")]
+        // [ApiController]
 
-        public async Task<IActionResult>  GetStudentAsync([FromRoute] Guid studentId)
+        public async Task<IActionResult> GetStudentAsync([FromRoute] Guid studentId)
         {
             var student = await studentRepository.GetStudentAsync(studentId);
 
-            if(student == null)
+            if (student == null)
             {
                 return NotFound();
             }
 
-            return Ok(mapper.Map<Student>(student));
+            return Ok(mapper.Map<Domain_Models.Student>(student));
 
         }
+
+        [HttpPut]
+        [Route("[controller]/{studentId:guid}")]
+        public async Task<IActionResult> UpdateStudentAsync([FromRoute] Guid studentId, [FromBody] UpdateStudentRequest request)
+        {
+            if (await studentRepository.Exists(studentId))
+            {
+                // update student
+                var updatedstudent = await studentRepository.UpdateStudent(studentId, mapper.Map<Data_Models.Student>(request));
+                if (updatedstudent != null)
+                {
+                    return Ok(mapper.Map<Domain_Models.Student>(updatedstudent));
+                }
+            }
+            return NotFound();
+        }
+
     }
 }
+
